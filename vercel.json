@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/generate-daily?secret=YOUR_CRON_SECRET",
+      "schedule": "5 0 * * *"
+    },
+    {
+      "path": "/api/generate-weekly?secret=YOUR_CRON_SECRET",
+      "schedule": "10 0 * * 1"
+    }
+  ]
+}
