@@ -1,5 +1,5 @@
 import { SIGNS, getSign } from "@/lib/signs";
-import { getHoroscopeData } from "@/lib/data";
+import { fetchDailyHoroscope } from "@/lib/data";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -15,12 +15,11 @@ export function generateMetadata({ params }: { params: { sign: string } }) {
   };
 }
 
-export default function DailyHoroscope({ params }: { params: { sign: string } }) {
+export default async function DailyHoroscope({ params }: { params: { sign: string } }) {
   const sign = getSign(params.sign);
   if (!sign) return notFound();
 
-  const data = getHoroscopeData(sign.id);
-  const daily = data?.daily;
+  const daily = await fetchDailyHoroscope(sign.id);
 
   return (
     <div className="max-w-4xl mx-auto space-y-12">
