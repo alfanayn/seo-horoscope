@@ -19,6 +19,7 @@ export async function GET(request: Request) {
     try {
       const prompt = `Write a daily horoscope for ${sign.name} for today.
 Tone: modern, mystical, warm, Gen Z friendly, natural English. Avoid repetitive astrology clichés.
+SAFETY: No professional medical or financial advice. Keep health and career insights strictly motivational and energy-based.
 Output EXACTLY as raw JSON without any markdown formatting, matching this schema:
 {
   "today_energy": "100-220 chars",
