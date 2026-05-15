@@ -1,5 +1,6 @@
+export const dynamic = 'force-static'
 import { SIGNS, getSign } from "@/lib/signs";
-import { fetchDailyHoroscope } from "@/lib/data";
+import { getHoroscope } from "@/lib/horoscope";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -19,16 +20,15 @@ export default async function DailyHoroscope({ params }: { params: { sign: strin
   const sign = getSign(params.sign);
   if (!sign) return notFound();
 
-  const daily = await fetchDailyHoroscope(sign.id);
-
+const data = getHoroscope(sign.id);
+const daily = data?.daily;
   return (
     <div className="max-w-4xl mx-auto space-y-12">
       <div className="text-center space-y-4 pb-4 border-b border-white/10">
         <div className="text-4xl">{sign.symbol}</div>
         <h1 className="text-4xl font-bold">{sign.name} Daily Horoscope</h1>
         <p className="text-white/60 text-sm font-mono tracking-wider">
-          UPDATED: {daily?.updatedAt ? new Date(daily.updatedAt).toLocaleDateString() : "PENDING"}
-        </p>
+UPDATED: {data?.updatedAt ? new Date(data.updatedAt).toLocaleDateString() : "PENDING"}        </p>
       </div>
 
       {daily && daily.today_energy ? (

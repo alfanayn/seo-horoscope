@@ -1,41 +1,95 @@
-import { NextResponse } from 'next/server';
-import { fetchWeeklyHoroscope } from '@/lib/data';
+import { NextResponse } from 'next/server'
+import { fetchFromClaude } from '@/lib/data'
+import { commitFileToGitHub } from '@/lib/github'
+import { SIGNS } from '@/lib/signs'
 
-export const dynamic = 'force-dynamic';
+export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const signId = searchParams.get('sign');
+  const { searchParams } = new URL(request.url)
 
-  if (!signId) {
-    return NextResponse.json({ ok: false, message: 'Sign parameter is required.' }, { status: 400 });
+  const secret = searchParams.get('secret')
+
+  if (secret !== process.env.CRON_SECRET) {
+    return NextResponse.json(
+      { ok: false, message: 'Unauthorized' },
+      { status: 401 }
+    )
   }
 
-  const horoscope = await fetchWeeklyHoroscope(signId);
+  const results = []
 
-  if (!horoscope) {
-    return NextResponse.json({ ok: false, message: 'Invalid zodiac sign or failed to generate.' }, { status: 400 });
+  for (const sign of SIGNS) {
+    try {
+const prompt = `Write a weekly horoscope for ${sign.name} for the upcoming week.
+Tone: modern, mystical, warm, Gen Z friendly, natural English. Avoid repetitive astrology clichés.
+Output EXACTLY as raw JSON without any markdown formatting, matching this schema:
+{
+  "overview": "100-220 chars",
+  "love": "100-220 chars",
+  "career": "100-220 chars",
+  "health": "100-220 chars",
+  "lucky_numbers": "three numbers separated by commas"
+}`
+
+const horoscope = await fetchFromClaude(prompt)
+      if (!horoscope) {
+        results.push({
+          sign: sign.id,
+          status: 'error',
+          message: 'Generation failed',
+        })
+
+        continue
+      }
+
+const existingResponse = await fetch(
+  `https://raw.githubusercontent.com/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/main/data/horoscopes/${sign.id}.json?t=${Date.now()}`,
+  {
+    cache: 'no-store'
+  }
+)
+
+      let existingData: any = {}
+
+      if (existingResponse.ok) {
+        existingData = await existingResponse.json()
+      }
+
+      const jsonContent = JSON.stringify(
+        {
+          ...existingData,
+          weekly: {
+            updatedAt: new Date().toISOString(),
+            ...horoscope,
+          },
+        },
+        null,
+        2
+      )
+
+      await commitFileToGitHub(
+        `data/horoscopes/${sign.id}.json`,
+        jsonContent,
+        `Update ${sign.name} weekly horoscope`
+      )
+
+      results.push({
+        sign: sign.id,
+        status: 'success',
+      })
+    } catch (error) {
+      results.push({
+        sign: sign.id,
+        status: 'error',
+        error: String(error),
+      })
+    }
   }
 
   return NextResponse.json({
     ok: true,
-    horoscope
-  }, {
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    }
-  });
-}
-
-export async function OPTIONS(request: Request) {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    },
-  });
+    generatedAt: new Date().toISOString(),
+    results,
+  })
 }

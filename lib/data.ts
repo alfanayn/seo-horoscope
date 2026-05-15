@@ -15,8 +15,7 @@ Output EXACTLY as raw JSON without any markdown formatting, matching this schema
   "lucky_number": "a single number between 1 and 99"
 }`;
 
-  return await fetchFromClaude(prompt, 43200);
-}
+return await fetchFromClaude(prompt);}
 
 export async function fetchWeeklyHoroscope(signId: string) {
   const sign = SIGNS.find((s) => s.id === signId);
@@ -33,10 +32,9 @@ Output EXACTLY as raw JSON without any markdown formatting, matching this schema
   "lucky_numbers": "three numbers separated by commas"
 }`;
 
-  return await fetchFromClaude(prompt, 86400);
-}
+return await fetchFromClaude(prompt);}
 
-async function fetchFromClaude(prompt: string, revalidateTime: number) {
+export async function fetchFromClaude(prompt: string) {
   const apiKey = process.env.ANTHROPIC_API_KEY;
   if (!apiKey) {
     console.error('API key missing');
@@ -56,7 +54,6 @@ async function fetchFromClaude(prompt: string, revalidateTime: number) {
         max_tokens: 1000,
         messages: [{ role: 'user', content: prompt }],
       }),
-      next: { revalidate: revalidateTime }
     });
 
     const data = await response.json();

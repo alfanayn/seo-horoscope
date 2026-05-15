@@ -1,5 +1,6 @@
+export const dynamic = 'force-static'
 import { SIGNS, getSign } from "@/lib/signs";
-import { fetchWeeklyHoroscope } from "@/lib/data";
+import { getHoroscope } from "@/lib/horoscope";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 
@@ -19,8 +20,8 @@ export default async function WeeklyHoroscope({ params }: { params: { sign: stri
   const sign = getSign(params.sign);
   if (!sign) return notFound();
 
-  const weekly = await fetchWeeklyHoroscope(sign.id);
-
+const data = getHoroscope(sign.id);
+const weekly = data?.weekly;
   return (
     <div className="max-w-4xl mx-auto space-y-12">
       <div className="text-center space-y-4 pb-4 border-b border-white/10">
