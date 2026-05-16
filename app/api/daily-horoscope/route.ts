@@ -29,12 +29,29 @@ Output EXACTLY as raw JSON without any markdown formatting, matching this schema
   "lucky_number": "a single number between 1 and 99"
 }`;
 
-      const horoscope = await fetchFromClaude(prompt); 
+let horoscope = null;
+let maxRetries = 3;
 
-      if (!horoscope) {
-        results.push({ sign: sign.id, status: 'error', message: 'Generation failed' })
-        continue
-      }
+for (let attempt = 1; attempt <= maxRetries; attempt++) {
+  horoscope = await fetchFromClaude(prompt);
+  
+  if (horoscope) {
+    break; // 
+  }
+  
+  console.warn(`${sign.name} için deneme ${attempt} başarısız oldu. Tekrar deneniyor...`);
+  
+  if (attempt < maxRetries) {
+
+    await new Promise(resolve => setTimeout(resolve, 2000));
+  }
+}
+
+
+if (!horoscope) {
+  results.push({ sign: sign.id, status: 'error', message: 'Generation failed after 3 attempts' });
+  continue;
+}
 
 const existingResponse = await fetch(
   `https://raw.githubusercontent.com/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/main/data/horoscopes/${sign.id}.json?t=${Date.now()}`,
