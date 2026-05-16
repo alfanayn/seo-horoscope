@@ -57,23 +57,24 @@ const existingResponse = await fetch(
         existingData = await existingResponse.json()
       }
 
-      const jsonContent = JSON.stringify(
-        {
-          ...existingData,
-          weekly: {
-            updatedAt: new Date().toISOString(),
-            ...horoscope,
-          },
-        },
-        null,
-        2
-      )
+const jsonContent = JSON.stringify(
+  {
+    ...existingData,
+    updatedAt: new Date().toISOString(),
+    weekly: {
+      updatedAt: new Date().toISOString(), 
+      ...horoscope,
+    },
+  },
+  null,
+  2
+)
 
-      await commitFileToGitHub(
-        `data/horoscopes/${sign.id}.json`,
-        jsonContent,
-        `Update ${sign.name} weekly horoscope`
-      )
+await commitFileToGitHub(
+  `data/horoscopes/${sign.id}.json`,
+  jsonContent,
+  `Update ${sign.name} weekly horoscope [skip ci]`
+)
 
       results.push({
         sign: sign.id,

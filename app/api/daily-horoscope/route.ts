@@ -52,14 +52,17 @@ if (existingResponse.ok) {
 const jsonContent = JSON.stringify(
   {
     ...existingData,
-    updatedAt: new Date().toISOString(),
-    daily: horoscope,
+    updatedAt: new Date().toISOString(), 
+    daily: {
+      updatedAt: new Date().toISOString(), 
+      ...horoscope,
+    },
   },
   null,
   2
 )
 
-      await commitFileToGitHub(`data/horoscopes/${sign.id}.json`, jsonContent, `Update ${sign.name} daily horoscope`)
+await commitFileToGitHub(`data/horoscopes/${sign.id}.json`, jsonContent, `Update ${sign.name} daily horoscope [skip ci]`)
       results.push({ sign: sign.id, status: 'success' })
     } catch (error) {
       results.push({ sign: sign.id, status: 'error', error: String(error) })
