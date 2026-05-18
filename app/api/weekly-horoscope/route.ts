@@ -30,7 +30,7 @@ Output EXACTLY as raw JSON without any markdown formatting, matching this schema
   "love": "150-220 chars",
   "career": "150-220 chars",
   "health": "150-220 chars",
-  "lucky_numbers": "three numbers separated by commas"
+  "lucky_numbers": "three numbers separated by a between 1 and 99 (random select)"
 }`
 
 let horoscope = null;

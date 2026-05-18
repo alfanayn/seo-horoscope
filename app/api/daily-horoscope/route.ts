@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { fetchFromClaude } from '@/lib/data' // Yeni helper'ı çağırıyoruz
+import { fetchFromClaude } from '@/lib/data' 
 import { commitFileToGitHub } from '@/lib/github'
 import { SIGNS } from '@/lib/signs'
 
@@ -26,7 +26,7 @@ Output EXACTLY as raw JSON without any markdown formatting, matching this schema
   "love": "100-220 chars",
   "career": "100-220 chars",
   "health": "100-220 chars",
-  "lucky_number": "a single number between 1 and 99"
+  "lucky_number": "a single number between 8 and 99 (random select)"
 }`;
 
 let horoscope = null;
