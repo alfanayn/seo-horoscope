@@ -26,7 +26,7 @@ Output EXACTLY as raw JSON without any markdown formatting, matching this schema
   "love": "100-220 chars",
   "career": "100-220 chars",
   "health": "100-220 chars",
-  "lucky_number": "a single number between 8 and 99 (random select)"
+"lucky_number": "A single random integer between 1 and 99. CRITICAL INSTRUCTION: You MUST NOT use the digit 7 anywhere. (e.g., 17, 27, 70-79, or 97 are STRICTLY FORBIDDEN)."
 }`;
 
 let horoscope = null;
