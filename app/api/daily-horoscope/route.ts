@@ -59,8 +59,10 @@ do {
 } while (randomNum.toString().includes('7')); 
 
 horoscope.lucky_number = randomNum.toString();
-// --- EKLENECEK KISIM BİTİŞİ ---
+const dailyScore = Math.floor(Math.random() * (99 - 50 + 1)) + 50; 
+horoscope.score = dailyScore.toString();
 const existingResponse = await fetch(
+  
   `https://raw.githubusercontent.com/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/main/data/horoscopes/${sign.id}.json?t=${Date.now()}`,
   {
     cache: 'no-store'
