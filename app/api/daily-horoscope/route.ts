@@ -53,6 +53,13 @@ if (!horoscope) {
   continue;
 }
 
+let randomNum;
+do {
+  randomNum = Math.floor(Math.random() * (99 - 8 + 1)) + 8;
+} while (randomNum.toString().includes('7')); 
+
+horoscope.lucky_number = randomNum.toString();
+// --- EKLENECEK KISIM BİTİŞİ ---
 const existingResponse = await fetch(
   `https://raw.githubusercontent.com/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/main/data/horoscopes/${sign.id}.json?t=${Date.now()}`,
   {
