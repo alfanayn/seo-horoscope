@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { fetchFromClaude } from '@/lib/data'
+import { fetchWeeklyHoroscope } from '@/lib/data'
 import { commitFileToGitHub } from '@/lib/github'
 import { SIGNS } from '@/lib/signs'
 
@@ -7,7 +7,6 @@ export const dynamic = 'force-dynamic'
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
-
   const secret = searchParams.get('secret')
 
   if (secret !== process.env.CRON_SECRET) {
@@ -21,41 +20,26 @@ export async function GET(request: Request) {
 
   for (const sign of SIGNS) {
     try {
-const prompt = `Write a weekly horoscope for ${sign.name} for the upcoming week.
-Tone: modern, mystical, warm, Gen Z friendly, natural English. Avoid repetitive astrology clichés.
-SAFETY: No professional medical or financial advice. Keep health and career insights strictly motivational and energy-based.
-Output EXACTLY as raw JSON without any markdown formatting, matching this schema:
-{
-  "overview": "150-220 chars",
-  "love": "150-220 chars",
-  "career": "150-220 chars",
-  "health": "150-220 chars",
-  "lucky_numbers": "Three unique random numbers between 1 and 99, separated by commas. CRITICAL INSTRUCTION: You MUST NOT use the digit 7 in any of these numbers."
-}`
+      let horoscope: any = null
+      const maxRetries = 3
 
-let horoscope = null;
-let maxRetries = 3;
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        horoscope = await fetchWeeklyHoroscope(sign.id)
+        if (horoscope) {
+          break
+        }
+        console.warn(`${sign.name} için deneme ${attempt} başarısız oldu. Tekrar deneniyor...`)
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 2000))
+        }
+      }
 
-for (let attempt = 1; attempt <= maxRetries; attempt++) {
-  horoscope = await fetchFromClaude(prompt);
-  
-  if (horoscope) {
-    break;
-  }
-  
-  console.warn(`${sign.name} için deneme ${attempt} başarısız oldu. Tekrar deneniyor...`);
-  
-  if (attempt < maxRetries) {
+      if (!horoscope) {
+        results.push({ sign: sign.id, status: 'error', message: 'Generation failed after 3 attempts' })
+        continue
+      }
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
-  }
-}
-
-
-if (!horoscope) {
-  results.push({ sign: sign.id, status: 'error', message: 'Generation failed after 3 attempts' });
-  continue;
-}
+      horoscope.score = String(horoscope.score ?? (Math.floor(Math.random() * (99 - 55 + 1)) + 55))
 
 const existingResponse = await fetch(
   `https://raw.githubusercontent.com/${process.env.GITHUB_OWNER}/${process.env.GITHUB_REPO}/main/data/horoscopes/${sign.id}.json?t=${Date.now()}`,
